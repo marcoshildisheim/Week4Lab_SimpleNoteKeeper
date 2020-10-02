@@ -1,20 +1,17 @@
 package models;
 
-import java.io.*;
-
 /**
  *
  * @author 820203
  */
-public class Note implements Serializable
+public class Note
 {
     private String title;
     private String message;
 
     public Note() 
     {
-        title = "";
-        message = "";
+
     }
 
     public Note(String title, String message) 
@@ -42,6 +39,5 @@ public class Note implements Serializable
     {
         this.message = message;
     }
-    
-    
+     
 }

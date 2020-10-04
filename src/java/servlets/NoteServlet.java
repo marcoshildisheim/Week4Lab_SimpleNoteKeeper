@@ -1,6 +1,7 @@
 package servlets;
 
 import java.io.*;
+import java.util.Scanner;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -19,49 +20,60 @@ public class NoteServlet extends HttpServlet
     {   
         String title = "";
         String message = "";
-        String noteFile;
         
         String edit = request.getParameter("edit");
         String path = getServletContext().getRealPath("/WEB-INF/note.txt");
         
-        BufferedReader br = new BufferedReader(new FileReader(new File(path)));          
-        title = br.readLine();
+        Scanner noteFile = new Scanner(new File(path));
         
-        while((noteFile = br.readLine()) != null)
+        title = noteFile.nextLine();
+        
+        while(noteFile.hasNextLine())
         {
-            message += "\n" + noteFile;
+            message += noteFile.nextLine();
         }
         
-        Note note = new Note(title, message);
-        request.setAttribute("note", note);
+        noteFile.close();
         
         if (edit == null)
         {
+            Note note = new Note(title, message);
+            request.setAttribute("note", note);
             getServletContext().getRequestDispatcher("/WEB-INF/viewnote.jsp").forward(request, response);
         }
         else
         {
+            message = message.replaceAll("\n", "<br>");
+            Note note = new Note(title, message);
+            request.setAttribute("note", note);
             getServletContext().getRequestDispatcher("/WEB-INF/editnote.jsp").forward(request, response);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException 
+            throws ServletException, IOException
     {
-        String edit = request.getParameter("edit");
         String title = request.getParameter("title");
-        String message = request.getParameter("message");
+        String message = request.getParameter("message");       
         
         String path = getServletContext().getRealPath("/WEB-INF/note.txt");
+        String [] messageSplit = message.split("\n");
         
-        PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(path, false))); 
-        pw.println(title);
-        pw.println(message);
-        pw.close();
+        PrintWriter noteFile = new PrintWriter(new BufferedWriter(new FileWriter(path))); 
+        noteFile.println(title);
+        
+        for(String line : messageSplit)
+        {
+            noteFile.println(line);
+        }
+        
+        message = message.replaceAll("\n", "<br>");
         
         Note note = new Note(title, message);
         request.setAttribute("note", note);
+        
+        noteFile.close();
         
         getServletContext().getRequestDispatcher("/WEB-INF/viewnote.jsp").forward(request, response);
     }
